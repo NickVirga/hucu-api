@@ -73,7 +73,6 @@ const remove = (req, res) => {
     .where({ id: req.params.id })
     .del()
     .then((result) => {
-      console.log(result)
       if (result === 0) {
         return res.status(400).json({
           message: `Ticket with ID: ${req.params.id} to be deleted not found.`,
