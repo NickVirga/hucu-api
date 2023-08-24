@@ -16,7 +16,7 @@ exports.up = function (knex) {
     })
     .createTable("organizations", (table) => {
       table.increments("id").primary();
-      table.string("organization_name").notNullable();
+      table.string("name").notNullable();
     })
     .createTable("agents", (table) => {
       table.increments("id").primary();
