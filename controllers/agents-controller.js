@@ -2,6 +2,12 @@ const knex = require("knex")(require("../knexfile"));
 
 const index = (req, res) => {
   knex("agents")
+  .modify((queryBuilder) => {
+    if (req.query.o) {
+      queryBuilder
+        .where("organization_id", req.query.o)
+    }
+  })
     .then((data) => {
       res.status(200).json(data);
     })

@@ -2,6 +2,16 @@ const knex = require("knex")(require("../knexfile"));
 
 const index = (req, res) => {
   knex("tickets")
+  .modify((queryBuilder) => {
+    if (req.query.o) {
+      queryBuilder
+        .where("organization_id", req.query.o)
+    }
+    if (req.query.a) {
+      queryBuilder
+        .where("agent_id", req.query.a)
+    }
+  })
     .then((data) => {
       res.status(200).json(data);
     })
@@ -30,7 +40,7 @@ const findOne = (req, res) => {
 };
 
 const add = (req, res) => {
-  if (!req.body.name || !req.body.email) {
+  if (!req.body.inquiry_option || !req.body.email) {
     return res
       .status(400)
       .send("Please provide name and email for the ticket in the request");
