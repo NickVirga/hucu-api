@@ -6,7 +6,7 @@ router.route("/").get(ticketsController.index).post(ticketsController.add);
 router
   .route("/:id")
   .get(ticketsController.findOne)
-  .patch(ticketsController.update)
+  .put(ticketsController.update)
   .delete(ticketsController.remove);
 
 module.exports = router;

@@ -50,6 +50,7 @@ const add = (req, res) => {
 };
 
 const update = (req, res) => {
+  console.log(req.body)
   knex("tickets")
     .where({ id: req.params.id })
     .update(req.body)
@@ -59,12 +60,12 @@ const update = (req, res) => {
       });
     })
     .then((updatedTicket) => {
-      res.json(updatedTicket[0]);
+      res.status(200).json(updatedTicket[0]);
     })
-    .catch(() => {
+    .catch((err) => {
       res
-        .status(500)
-        .json({ message: `Unable to update ticket with ID: ${req.params.id}` });
+        .status(404)
+        .json({ message: `Ticket with ID: ${req.params.id} not found` });
     });
 };
 
