@@ -12,10 +12,12 @@ app.use(
 
 app.use(express.json());
 
+const authRoutes = require("./routes/auth-routes");
 const agentsRoutes = require("./routes/agents-routes");
 const ticketsRoutes = require("./routes/tickets-routes");
 const usersRoutes = require("./routes/users-routes");
 
+app.use("/api/auth", authRoutes);
 app.use("/api/agents", agentsRoutes);
 app.use("/api/tickets", ticketsRoutes);
 app.use("/api/users", usersRoutes);

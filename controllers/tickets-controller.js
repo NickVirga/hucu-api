@@ -2,16 +2,14 @@ const knex = require("knex")(require("../knexfile"));
 
 const index = (req, res) => {
   knex("tickets")
-  .modify((queryBuilder) => {
-    if (req.query.o) {
-      queryBuilder
-        .where("organization_id", req.query.o)
-    }
-    if (req.query.a) {
-      queryBuilder
-        .where("agent_id", req.query.a)
-    }
-  })
+    .modify((queryBuilder) => {
+      if (req.query.o) {
+        queryBuilder.where("organization_id", req.query.o);
+      }
+      if (req.query.a) {
+        queryBuilder.where("agent_id", req.query.a);
+      }
+    })
     .then((data) => {
       res.status(200).json(data);
     })
@@ -40,11 +38,36 @@ const findOne = (req, res) => {
 };
 
 const add = (req, res) => {
-  if (!req.body.inquiry_option || !req.body.email) {
-    return res
-      .status(400)
-      .send("Please provide name and email for the ticket in the request");
+  const requiredAddProperties = [
+    "inquiry_option",
+    "client_first_name",
+    "client_last_name",
+    "client_phone_number",
+    "client_email",
+    "scheduled_at",
+    "status",
+  ];
+
+  const hasAllProperties = (obj, props) => {
+    for (var i = 0; i < props.length; i++) {
+      if (!obj.hasOwnProperty(props[i])) return false;
+    }
+    return true;
+  };
+
+  if (!hasAllProperties(req.body, requiredAddProperties)) {
+    res.status(400).json({
+      message: `One or more missing properties in request body`,
+    });
+    return;
   }
+
+  const currentDate = new Date()
+  timeSplit = req.body.scheduled_at.split(":")
+  currentDate.setHours(timeSplit[0])
+  currentDate.setMinutes(timeSplit[1])
+  currentDateMySqlFormat = currentDate.toISOString().slice(0, 19).replace('T', ' ');
+  req.body.scheduled_at = currentDateMySqlFormat
 
   knex("tickets")
     .insert(req.body)
@@ -60,7 +83,7 @@ const add = (req, res) => {
 };
 
 const update = (req, res) => {
-  console.log(req.body)
+  console.log(req.body);
   knex("tickets")
     .where({ id: req.params.id })
     .update(req.body)
