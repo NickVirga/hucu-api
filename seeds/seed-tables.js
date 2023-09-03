@@ -1,7 +1,4 @@
-const agentsData = require("../seed-data/agents");
-const organizationsData = require("../seed-data/organizations");
-const ticketsData = require("../seed-data/tickets");
-const usersData = require("../seed-data/users");
+const {usersData, organizationsData, agentsData, ticketsData} = require("../seed-data/build-seed-data");
 
 exports.seed = function (knex) {
   return knex("agents")

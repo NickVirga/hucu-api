@@ -5,7 +5,7 @@
 exports.up = function (knex) {
   return knex.schema
     .createTable("users", (table) => {
-      table.increments("id").primary();
+      table.string("id").primary();
       table.string("username").notNullable();
       table.string("password").notNullable();
       table.string("role").notNullable();
@@ -13,43 +13,46 @@ exports.up = function (knex) {
       table.string("last_name").notNullable();
       table.string("phone_number").notNullable();
       table.string("email").notNullable();
+      table.boolean("is_anonymous").defaultTo(true);
     })
     .createTable("organizations", (table) => {
-      table.increments("id").primary();
+      table.string("id").primary();
       table.string("name").notNullable();
     })
     .createTable("agents", (table) => {
-      table.increments("id").primary();
+      table.string("id").primary();
       table
-        .integer("organization_id")
-        .unsigned()
+
+        .string("organization_id")
         .references("organizations.id")
         .onUpdate("CASCADE")
         .onDelete("CASCADE");
       table
-        .integer("user_id")
-        .unsigned()
+        .string("user_id")
         .references("users.id")
         .onUpdate("CASCADE")
         .onDelete("CASCADE");
     })
     .createTable("tickets", (table) => {
-      table.increments("id").primary();
+      table.string("id").primary();
       table.string("inquiry_option").notNullable();
       table.string("client_first_name").notNullable();
       table.string("client_last_name").notNullable();
       table.string("client_phone_number").notNullable();
       table.string("client_email").notNullable();
-      table.string("client_notes").notNullable();
+      table.string("client_notes")
       table
-        .integer("agent_id")
-        .unsigned()
+        .string("user_id")
+        .references("users.id")
+        .onUpdate("CASCADE")
+        .onDelete("CASCADE");
+      table
+        .string("agent_id")
         .references("agents.id")
         .onUpdate("CASCADE")
         .onDelete("CASCADE");
       table
-        .integer("organization_id")
-        .unsigned()
+        .string("organization_id")
         .references("organizations.id")
         .onUpdate("CASCADE")
         .onDelete("CASCADE");
@@ -58,7 +61,7 @@ exports.up = function (knex) {
       table.timestamp("scheduled_at");
       table.timestamp("closed_at");
       table.string("agent_notes");
-      table.integer("queue_number").unsigned();
+      table.integer("queue_number").unsigned().notNullable().defaultTo(1);
     });
 };
 

@@ -8,7 +8,7 @@ router.use(authorize)
 
 router
   .route("/:id")
-  .get(ticketsController.findOne)
+  .get(ticketsController.findOne, authorize)
   .put(ticketsController.update)
   .delete(ticketsController.remove);
 
