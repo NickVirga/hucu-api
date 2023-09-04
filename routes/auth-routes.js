@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const knex = require("knex")(require("../knexfile"));
-const { v4: uuidv4 } = require("uuid");
+// const { v4: uuidv4 } = require("uuid");
 
 router.post("/login", (req, res) => {
   const { username, password } = req.body;
@@ -71,18 +71,22 @@ router.post("/signup", (req, res) => {
     return;
   }
 
-  req.body.id = uuidv4();
+  // req.body.id = uuidv4();
   req.body.role = "client";
+  req.body.is_anonymous = false;
+
+  console.log(req.body)
 
   knex("users")
     .insert(req.body)
-    .then(() => {
-      return knex("users").where({ id: req.body.id });
+    .then((userData) => {
+      return knex("users").where( {id: userData[0]}).first();
     })
     .then((createdUser) => {
       res.status(201).json(createdUser);
     })
-    .catch(() => {
+    .catch((err) => {
+      console.log(err)
       res.status(500).json({ message: "Unable to create new user" });
     });
 });

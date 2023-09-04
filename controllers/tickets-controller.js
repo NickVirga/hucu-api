@@ -1,8 +1,8 @@
 const knex = require("knex")(require("../knexfile"));
-const { v4: uuidv4 } = require("uuid");
+// const { v4: uuidv4 } = require("uuid");
 
 const index = (req, res) => {
-  if (req.role === "agent" || req.role === "dispatcher") {
+  if (req.role === "agent") {
     knex("agents")
       .where({ user_id: req.user_id })
       .select("id", "organization_id")
@@ -23,6 +23,26 @@ const index = (req, res) => {
       .catch((err) =>
         res.status(400).send(`Error fetching agent's organization ID: ${err}`)
       );
+  } else if (req.role === "dispatcher") {
+    knex("agents")
+      .where({ user_id: req.user_id })
+      .select("organization_id")
+      .first()
+      .then((agentData) => {
+        return knex("tickets")
+          .where({
+            organization_id: agentData.organization_id,
+          })
+          .then((ticketsData) => {
+            res.status(200).json(ticketsData);
+          })
+          .catch((err) =>
+            res.status(400).send(`Error retrieving Tickets: ${err}`)
+          );
+      })
+      .catch((err) =>
+        res.status(400).send(`Error fetching agent's organization ID: ${err}`)
+      );
   } else {
     res.status(401).json({
       message: `Unauthorized to view tickets`,
@@ -32,7 +52,28 @@ const index = (req, res) => {
 
 const findOne = (req, res) => {
   knex("tickets")
-    .where({ id: req.params.id })
+    .where({ "tickets.id": req.params.id })
+    .select(
+      "tickets.agent_id",
+      "tickets.agent_notes",
+      "tickets.client_email",
+      "tickets.client_first_name",
+      "tickets.client_last_name",
+      "tickets.client_notes",
+      "tickets.client_phone_number",
+      "tickets.closed_at",
+      "tickets.created_at",
+      "tickets.id",
+      "tickets.inquiry_option",
+      "tickets.queue_number",
+      "tickets.scheduled_at",
+      "tickets.status",
+      "tickets.user_id",
+      "users.first_name",
+      "users.last_name"
+    )
+    .leftJoin("agents", "tickets.agent_id", "agents.id")
+    .leftJoin("users", "users.id", "agents.user_id")
     .then((ticketsFound) => {
       if (ticketsFound.length === 0) {
         return res
@@ -52,7 +93,8 @@ const findOne = (req, res) => {
         message: `Unauthorized to view ticket with ID: ${req.params.id}`,
       });
     })
-    .catch(() => {
+    .catch((err) => {
+      console.log(err);
       res.status(500).json({
         message: `Unable to retrieve ticket data for ticket with ID: ${req.params.id}`,
       });
@@ -84,7 +126,7 @@ const add = (req, res) => {
     return;
   }
 
-  req.body.id = uuidv4();
+  // req.body.id = uuidv4();
   req.body.user_id = req.user_id;
 
   const currentDate = new Date();
@@ -100,8 +142,8 @@ const add = (req, res) => {
 
   knex("tickets")
     .insert(req.body)
-    .then(() => {
-      return knex("tickets").where({ id: req.body.id });
+    .then((ticketData) => {
+      return knex("tickets").where({ id: ticketData[0] }).first();
     })
     .then((createdTicket) => {
       res.status(201).json(createdTicket);
@@ -112,22 +154,28 @@ const add = (req, res) => {
 };
 
 const update = (req, res) => {
-  knex("tickets")
-    .where({ id: req.params.id })
-    .update(req.body)
-    .then(() => {
-      return knex("tickets").where({
-        id: req.params.id,
+  if (req.role === "agent" || req.role === "dispatcher") {
+    knex("tickets")
+      .where({ id: req.params.id })
+      .update(req.body)
+      .then(() => {
+        return knex("tickets").where({
+          id: req.params.id,
+        });
+      })
+      .then((updatedTicket) => {
+        res.status(200).json(updatedTicket[0]);
+      })
+      .catch((err) => {
+        res
+          .status(404)
+          .json({ message: `Ticket with ID: ${req.params.id} not found` });
       });
-    })
-    .then((updatedTicket) => {
-      res.status(200).json(updatedTicket[0]);
-    })
-    .catch((err) => {
-      res
-        .status(404)
-        .json({ message: `Ticket with ID: ${req.params.id} not found` });
+  } else {
+    res.status(401).json({
+      message: `Unauthorized to edit ticket with ID: ${req.params.id}`,
     });
+  }
 };
 
 const remove = (req, res) => {

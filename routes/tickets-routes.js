@@ -10,7 +10,7 @@ router
 router
   .route("/:id")
   .get(authorize, ticketsController.findOne)
-  .put(ticketsController.update)
+  .put(authorize, ticketsController.update)
   .delete(ticketsController.remove);
 
 module.exports = router;
