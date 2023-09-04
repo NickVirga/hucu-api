@@ -2,13 +2,14 @@ const router = require("express").Router();
 const ticketsController = require("../controllers/tickets-controller");
 const authorize = require("../middleware/authorize");
 
-router.route("/").get(ticketsController.index).post(ticketsController.add);
-
-router.use(authorize)
+router
+  .route("/")
+  .get(authorize, ticketsController.index)
+  .post(authorize, ticketsController.add);
 
 router
   .route("/:id")
-  .get(ticketsController.findOne, authorize)
+  .get(authorize, ticketsController.findOne)
   .put(ticketsController.update)
   .delete(ticketsController.remove);
 

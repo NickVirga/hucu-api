@@ -9,7 +9,6 @@ const authorize = require("../middleware/authorize");
 router.get("/", authorize, (req, res) => {
   knex("users")
     .select(
-      "id",
       "username",
       "role",
       "first_name",
@@ -17,9 +16,31 @@ router.get("/", authorize, (req, res) => {
       "phone_number",
       "email"
     )
+    .first()
     .where({ id: req.user_id })
-    .then((userdata) => {
-      res.json(userdata);
+    .then((userData) => {
+      if (userData.role === "agent" || userData.role === "dispatcher") {
+        knex("agents")
+          .select("organization_id")
+          .first()
+          .where({ user_id: req.user_id })
+          .then((agentData) => {
+            userData.organization_id = agentData.organization_id;
+            res.json(userData);
+          })
+          .catch((error) => {
+            res
+              .status(500)
+              .json({ error: "An error occurred while fetching agent data." });
+          });
+      } else {
+        res.json(userData);
+      }
+    })
+    .catch((error) => {
+      res
+        .status(500)
+        .json({ error: "An error occurred while fetching user data." });
     });
 });
 

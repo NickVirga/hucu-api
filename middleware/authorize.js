@@ -2,7 +2,7 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
 const authorize = (req, res, next) => {
-    console.log("authorizing..")
+    // console.log("authorizing..")
     const bearerTokenString = req.headers.authorization;
 
     if (!bearerTokenString) {
@@ -27,8 +27,8 @@ const authorize = (req, res, next) => {
                 error: "Invalid JWT"
             })
         }
-        
         req.user_id = payload.user_id;
+        req.role = payload.role;
         next();
     })
 }
