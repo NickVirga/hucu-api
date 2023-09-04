@@ -1,10 +1,16 @@
 const { faker } = require("@faker-js/faker");
 
-function generateRandomUser() {
+const numUsers = 150;
+const numAgents = 10;
+const numTickets = 200;
+
+
+function generateRandomUser(index) {
   const firstname = faker.person.firstName();
   const lastname = faker.person.lastName();
   const user = {
-    id: faker.string.uuid(),
+    // id: faker.string.uuid(),
+    id: index,
     username: faker.internet.displayName({
       firstName: firstname,
       lastName: lastname,
@@ -20,7 +26,12 @@ function generateRandomUser() {
   return user;
 }
 
-const usersData = Array.from({ length: 150 }, () => generateRandomUser());
+const usersData = [];
+for (let i = 1; i <= numUsers; i++) {
+  usersData.push(generateRandomUser(i))
+}
+
+// const usersData = Array.from({ length: 150 }, () => generateRandomUser());
 
 const organizationNames = [
   "Loyal Bank of Canada",
@@ -46,9 +57,10 @@ const organizationNames = [
 ];
 
 const generateOrganizations = () => {
-  return organizationNames.map((orgName) => {
+  return organizationNames.map((orgName, index) => {
     return {
-      id: faker.string.uuid(),
+      // id: faker.string.uuid(),
+      id: index + 1,
       name: orgName,
     };
   });
@@ -69,9 +81,10 @@ const selectRandomUsers = (numberUsers) => {
 };
 
 const generateAgents = () => {
-  return selectRandomUsers(10).map((randomUser) => {
+  return selectRandomUsers(numAgents).map((randomUser, index) => {
     return {
-      id: faker.string.uuid(),
+      // id: faker.string.uuid(),
+      id: index + 1,
       organization_id: organizationsData[0].id,
       user_id: randomUser.id,
     };
@@ -122,7 +135,7 @@ const statuses = [
   "Cancelled",
 ];
 
-const generateTickets = () => {
+const generateTickets = (index) => {
   const clientUsers = usersData.filter((users) => users.role === "client");
   const agentUsers = usersData.filter((users) => users.role === "agent");
   const randomUser =
@@ -130,7 +143,8 @@ const generateTickets = () => {
   const randomAgent = agentUsers[Math.floor(Math.random() * agentUsers.length)];
   const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
   const ticket = {
-    id: faker.string.uuid(),
+    // id: faker.string.uuid(),
+    id: index,
     inquiry_option:
       inquiryOptions[Math.floor(Math.random() * inquiryOptions.length)],
     client_first_name: randomUser.first_name,
@@ -145,7 +159,13 @@ const generateTickets = () => {
   return ticket;
 };
 
-const ticketsData = Array.from({ length: 200 }, () => generateTickets());
+
+const ticketsData  = [];
+for (let i = 1; i <= numTickets; i++) {
+  ticketsData.push(generateTickets(i))
+}
+
+// const ticketsData = Array.from({ length: 200 }, () => generateTickets());
 
 module.exports = {
   usersData,
