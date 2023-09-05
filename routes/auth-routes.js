@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const knex = require("knex")(require("../knexfile"));
+const { faker } = require("@faker-js/faker");
 
 router.post("/login", (req, res) => {
   const { username, password } = req.body;
@@ -72,6 +73,7 @@ router.post("/signup", (req, res) => {
 
   req.body.role = "client";
   req.body.is_anonymous = false;
+  req.body.avatar=faker.internet.avatar()
 
   knex("users")
     .insert(req.body)

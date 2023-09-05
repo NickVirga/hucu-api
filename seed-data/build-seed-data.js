@@ -9,7 +9,6 @@ function generateRandomUser(index) {
   const firstname = faker.person.firstName();
   const lastname = faker.person.lastName();
   const user = {
-    // id: faker.string.uuid(),
     id: index,
     username: faker.internet.displayName({
       firstName: firstname,
@@ -18,7 +17,7 @@ function generateRandomUser(index) {
     password: faker.internet.password(),
     first_name: firstname,
     last_name: lastname,
-    phone_number: faker.phone.number(),
+    phone_number: faker.phone.number('1##########'),
     email: faker.internet.email({ firstName: firstname, lastName: lastname }),
     role: "client",
     is_anonymous: false,
@@ -31,8 +30,6 @@ const usersData = [];
 for (let i = 1; i <= numUsers; i++) {
   usersData.push(generateRandomUser(i))
 }
-
-// const usersData = Array.from({ length: 150 }, () => generateRandomUser());
 
 const organizationNames = [
   "Loyal Bank of Canada",
@@ -60,7 +57,6 @@ const organizationNames = [
 const generateOrganizations = () => {
   return organizationNames.map((orgName, index) => {
     return {
-      // id: faker.string.uuid(),
       id: index + 1,
       name: orgName,
     };
@@ -84,7 +80,6 @@ const selectRandomUsers = (numberUsers) => {
 const generateAgents = () => {
   return selectRandomUsers(numAgents).map((randomUser, index) => {
     return {
-      // id: faker.string.uuid(),
       id: index + 1,
       organization_id: organizationsData[0].id,
       user_id: randomUser.id,
@@ -144,7 +139,6 @@ const generateTickets = (index) => {
   const randomAgent = agentUsers[Math.floor(Math.random() * agentUsers.length)];
   const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
   const ticket = {
-    // id: faker.string.uuid(),
     id: index,
     inquiry_option:
       inquiryOptions[Math.floor(Math.random() * inquiryOptions.length)],
@@ -156,6 +150,7 @@ const generateTickets = (index) => {
     agent_id: agentsData.find((agent) => agent.user_id === randomAgent.id).id,
     status: randomStatus,
     organization_id: organizationsData[0].id,
+    queue_number: index
   };
   return ticket;
 };
@@ -166,7 +161,6 @@ for (let i = 1; i <= numTickets; i++) {
   ticketsData.push(generateTickets(i))
 }
 
-// const ticketsData = Array.from({ length: 200 }, () => generateTickets());
 
 module.exports = {
   usersData,
