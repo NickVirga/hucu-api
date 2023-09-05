@@ -88,22 +88,20 @@ const findOne = (req, res) => {
         req.role === "dispatcher"
       ) {
         if (ticketData.agent_id) {
-          return (
-            knex("tickets")
-              .count()
-              .where({ "tickets.agent_id": ticketData.agent_id })
-              .whereIn("tickets.status", ["Open", "In Progress", "Reopened"])
-              .where("tickets.queue_number", "<", ticketData.queue_number)
-              .then((ticketCount) => {
-                ticketData.ticket_count = ticketCount[0]['count(*)'];
-                return res.status(200).json(ticketData);
-              })
-              .catch((err) => {
-                res.status(500).json({
-                  message: `Unable to retrieve number of tickets in queue ahead of ticket with ID: ${req.params.id}`,
-                });
-              })
-          );
+          return knex("tickets")
+            .count()
+            .where({ "tickets.agent_id": ticketData.agent_id })
+            .whereIn("tickets.status", ["Open", "In Progress", "Reopened"])
+            .where("tickets.queue_number", "<", ticketData.queue_number)
+            .then((ticketCount) => {
+              ticketData.ticket_count = ticketCount[0]["count(*)"];
+              return res.status(200).json(ticketData);
+            })
+            .catch((err) => {
+              res.status(500).json({
+                message: `Unable to retrieve number of tickets in queue ahead of ticket with ID: ${req.params.id}`,
+              });
+            });
         } else {
           return res.status(200).json(ticketData);
         }
@@ -128,6 +126,7 @@ const add = (req, res) => {
     "client_email",
     "scheduled_at",
     "status",
+    "organization_id",
   ];
 
   const hasAllProperties = (obj, props) => {
@@ -173,22 +172,79 @@ const add = (req, res) => {
 
 const update = (req, res) => {
   if (req.role === "agent" || req.role === "dispatcher") {
+    // findout if the ticket currently has no agent assigned
     knex("tickets")
       .where({ id: req.params.id })
-      .update(req.body)
-      .then(() => {
-        return knex("tickets").where({
-          id: req.params.id,
-        });
-      })
-      .then((updatedTicket) => {
-        res.status(200).json(updatedTicket[0]);
-      })
-      .catch((err) => {
+      .select("agent_id")
+      .first()
+      .then((ticketData) => {
+        // if ticket is getting agent assigned for first time, find that agents largest queue number
+        if (ticketData.agent_id === null && req.body.agent_id !== null) {
+          return knex("tickets")
+            .where({ "tickets.agent_id": req.body.agent_id })
+            .whereIn("tickets.status", ["Open", "In Progress", "Reopened"])
+            .max("tickets.queue_number as max_queue_number")
+            .then((result) => {
+              const maxQueueNumber = result[0].max_queue_number;
+              // assign the queue number of the new ticket to be one greater than largest queue number
+              req.body.queue_number = maxQueueNumber + 1;
+              // update ticket normally
+              return knex("tickets")
+                .where({ id: req.params.id })
+                .update(req.body)
+                .then(() => {
+                  return knex("tickets").where({
+                    id: req.params.id,
+                  });
+                })
+                .then((updatedTicket) => {
+                  res.status(200).json(updatedTicket[0]);
+                })
+                .catch((err) => {
+                  console.log(err);
+                  res.status(404).json({
+                    message: `Ticket with ID: ${req.params.id} not found`,
+                  });
+                });
+            })
+            .catch((err) => {
+              console.log(err);
+              res
+                .status(500)
+                .json({
+                  message: `Largest queue number for agent could not be found.`,
+                });
+            });
+        } else {
+          // update ticket normally if it already has an agent assigned
+          knex("tickets")
+            .where({ id: req.params.id })
+            .update(req.body)
+            .then(() => {
+              return knex("tickets").where({
+                id: req.params.id,
+              });
+            })
+            .then((updatedTicket) => {
+              res.status(200).json(updatedTicket[0]);
+            })
+            .catch((err) => {
+              console.log(err);
+              res
+                .status(404)
+                .json({
+                  message: `Ticket with ID: ${req.params.id} not found`,
+                });
+            });
+        }
+      }).catch((err) => {
+        console.log(err);
         res
           .status(404)
-          .json({ message: `Ticket with ID: ${req.params.id} not found` });
-      });
+          .json({
+            message: `Agent ID for ticket with ID: ${req.params.id} not found`,
+          });
+      });;
   } else {
     res.status(401).json({
       message: `Unauthorized to edit ticket with ID: ${req.params.id}`,
@@ -196,29 +252,9 @@ const update = (req, res) => {
   }
 };
 
-const remove = (req, res) => {
-  knex("tickets")
-    .where({ id: req.params.id })
-    .del()
-    .then((result) => {
-      if (result === 0) {
-        return res.status(400).json({
-          message: `Ticket with ID: ${req.params.id} to be deleted not found.`,
-        });
-      }
-
-      // no content response
-      res.status(204).send();
-    })
-    .catch(() => {
-      res.status(500).json({ message: "Unable to delete ticket" });
-    });
-};
-
 module.exports = {
   index,
   findOne,
   add,
   update,
-  remove,
 };

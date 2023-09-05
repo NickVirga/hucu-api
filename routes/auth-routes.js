@@ -1,7 +1,6 @@
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const knex = require("knex")(require("../knexfile"));
-// const { v4: uuidv4 } = require("uuid");
 
 router.post("/login", (req, res) => {
   const { username, password } = req.body;
@@ -71,7 +70,6 @@ router.post("/signup", (req, res) => {
     return;
   }
 
-  // req.body.id = uuidv4();
   req.body.role = "client";
   req.body.is_anonymous = false;
 
