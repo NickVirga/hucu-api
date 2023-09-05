@@ -15,6 +15,7 @@ exports.up = function (knex) {
       table.string("phone_number").notNullable();
       table.string("email").notNullable();
       table.boolean("is_anonymous").defaultTo(true);
+      table.string("avatar");
     })
     .createTable("organizations", (table) => {
       // table.string("id").primary();

@@ -87,14 +87,32 @@ const findOne = (req, res) => {
         req.role === "agent" ||
         req.role === "dispatcher"
       ) {
-        return res.status(200).json(ticketData);
+        if (ticketData.agent_id) {
+          return (
+            knex("tickets")
+              .count()
+              .where({ "tickets.agent_id": ticketData.agent_id })
+              .whereIn("tickets.status", ["Open", "In Progress", "Reopened"])
+              .where("tickets.queue_number", "<", ticketData.queue_number)
+              .then((ticketCount) => {
+                ticketData.ticket_count = ticketCount[0]['count(*)'];
+                return res.status(200).json(ticketData);
+              })
+              .catch((err) => {
+                res.status(500).json({
+                  message: `Unable to retrieve number of tickets in queue ahead of ticket with ID: ${req.params.id}`,
+                });
+              })
+          );
+        } else {
+          return res.status(200).json(ticketData);
+        }
       }
       res.status(401).json({
         message: `Unauthorized to view ticket with ID: ${req.params.id}`,
       });
     })
     .catch((err) => {
-      console.log(err);
       res.status(500).json({
         message: `Unable to retrieve ticket data for ticket with ID: ${req.params.id}`,
       });

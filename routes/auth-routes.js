@@ -75,8 +75,6 @@ router.post("/signup", (req, res) => {
   req.body.role = "client";
   req.body.is_anonymous = false;
 
-  console.log(req.body)
-
   knex("users")
     .insert(req.body)
     .then((userData) => {

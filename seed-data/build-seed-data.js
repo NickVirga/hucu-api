@@ -22,6 +22,7 @@ function generateRandomUser(index) {
     email: faker.internet.email({ firstName: firstname, lastName: lastname }),
     role: "client",
     is_anonymous: false,
+    avatar: faker.internet.avatar()
   };
   return user;
 }
