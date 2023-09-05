@@ -1,5 +1,4 @@
 const knex = require("knex")(require("../knexfile"));
-// const { v4: uuidv4 } = require("uuid");
 
 const index = (req, res) => {
   if (req.role === "agent") {

@@ -20,11 +20,6 @@ const index = (req, res) => {
       })
       .catch((err) => res.status(400).send(`Error retrieving user data: ${err}`));
   } 
-  // else if (req.role === "agent") {
-  //   res.status(200).json({
-  //     message: `Unauthorized to view agents`,
-  //   });
-  // } 
   else {
     res.status(401).json({
       message: `Unauthorized to view agents`,

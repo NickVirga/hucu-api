@@ -5,7 +5,6 @@
 exports.up = function (knex) {
   return knex.schema
     .createTable("users", (table) => {
-      // table.string("id").primary();
       table.increments('id').primary();
       table.string("username").notNullable();
       table.string("password").notNullable();
@@ -18,22 +17,18 @@ exports.up = function (knex) {
       table.string("avatar");
     })
     .createTable("organizations", (table) => {
-      // table.string("id").primary();
       table.increments('id').primary();
       table.string("name").notNullable();
     })
     .createTable("agents", (table) => {
-      // table.string("id").primary();
       table.increments('id').primary();
       table
-        // .string("organization_id")
         .integer("organization_id")
         .unsigned()
         .references("organizations.id")
         .onUpdate("CASCADE")
         .onDelete("CASCADE");
       table
-        // .string("user_id")
         .integer("user_id")
         .unsigned()
         .references("users.id")
@@ -41,7 +36,6 @@ exports.up = function (knex) {
         .onDelete("CASCADE");
     })
     .createTable("tickets", (table) => {
-      // table.string("id").primary();
       table.increments('id').primary();
       table.string("inquiry_option").notNullable();
       table.string("client_first_name").notNullable();
@@ -50,21 +44,18 @@ exports.up = function (knex) {
       table.string("client_email").notNullable();
       table.string("client_notes");
       table
-        // .string("user_id")
         .integer("user_id")
         .unsigned()
         .references("users.id")
         .onUpdate("CASCADE")
         .onDelete("CASCADE");
       table
-        // .string("agent_id")
         .integer("agent_id")
         .unsigned()
         .references("agents.id")
         .onUpdate("CASCADE")
         .onDelete("CASCADE");
       table
-        // .string("organization_id")
         .integer("organization_id")
         .unsigned()
         .references("organizations.id")
