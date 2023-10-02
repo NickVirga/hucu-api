@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 // app.use(
 //   cors({
@@ -14,9 +14,9 @@ const port = process.env.PORT;
 
 app.use(
   cors({
-    origin: '*',
-    methods: 'GET, POST, PUT, DELETE',
-    allowedHeaders: 'Content-Type,Authorization',
+    origin: "*",
+    methods: "GET, POST, PUT, DELETE",
+    allowedHeaders: "Content-Type,Authorization",
     credentials: true,
   })
 );
